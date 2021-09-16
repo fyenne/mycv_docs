@@ -1,0 +1,9 @@
+chines/data/data/input_1_1_5.jpg
+/data/
+# /data
+*.jpg
+# \data\data\ 
+*.png
+*.json
+*.mat
+*.tfrecords
