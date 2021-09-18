@@ -4,6 +4,7 @@ author: siming yan
 reference: 
 	kaggle: Tensorflow/Keras/GPU for Chinese MNIST Prediction
 	https://www.pyimagesearch.com/2018/12/31/keras-conv2d-and-convolutional-layers/
+	The Deep Learning with Keras Workshop An Interactive Approach to Understanding Deep Learning with Keras, 2nd Edition by Matthew Moocarme, Mahla Abdolahnejad, Ritesh Bhagwat
 ```
 
 
@@ -109,9 +110,41 @@ PATIENCE = 5
 VERBOSE = 1
 ```
 
+### image Augmentation:
+
+```python
+from keras.preprocessing.image import ImageDataGenerator
+train_datagen = ImageDataGenerator(rescale = 1./255.0,
+                                   shear_range = 0.3,
+                                   zoom_range = 0.3,
+                                   horizontal_flip = False)
+test_datagen = ImageDataGenerator(rescale = 1./255.0)
+
+```
+
++ Reduces overfitting: It helps reduce overfitting by creating multiple versions of the 
+  same image, rotated by a given amount.
++  Increases the number of images: A single image acts as multiple images. So, 
+  essentially, the dataset has fewer images, but each image can be converted into 
+  multiple images with image augmentation. Image augmentation will increase the 
+  number of images and each image will be treated differently by the algorithm.
++ Easy to predict new images: Imagine that a single image of a football is looked at 
+  from different angles and each angle is considered a distinct image. This will mean 
+  that the algorithm will be more accurate at predicting new images
+
 
 
 ## build up model:
+
+### feature detector &max pooling & flatten
+
+![image-20210918161204311](C:\Users\dscshap3808\Documents\my_scripts_new\mycv_plays\doc_pics\image-20210918161204311.png)
+
+![image-20210918161144858](C:\Users\dscshap3808\Documents\my_scripts_new\mycv_plays\doc_pics\image-20210918161144858.png)
+
+![image-20210918161431613](C:\Users\dscshap3808\Documents\my_scripts_new\mycv_plays\doc_pics\image-20210918161431613.png)
+
+An Artificial Neural Network (ANN)
 
 ```python
 model=Sequential()
@@ -148,7 +181,9 @@ Conv2D (filters, kernel_size, strides=(1, 1),\
   If so, consider using a 5×5 or 7×7 kernel to learn larger features and then quickly reduce spatial dimensions — then start working with 3×3 kernels
   ```
 
-+ <kernel size>: **must be an \*odd\* integer as well.** Typical values for  kernel_size  include: (1, 1) , (3, 3) , (5, 5) , (7, 7) . It’s rare to see kernel sizes larger than *7×7*.![keras_conv2d_padding](C:\Users\dscshap3808\Documents\my_scripts_new\my_docs\keras_conv2d_padding.gif)
++ <kernel size>: **must be an \*odd\* integer as well.** Typical values for  kernel_size  include: (1, 1) , (3, 3) , (5, 5) , (7, 7) . It’s rare to see kernel sizes larger than *7×7*.
+
++ ![keras_conv2d_padding](C:\Users\dscshap3808\Documents\my_scripts_new\mycv_plays\doc_pics\keras_conv2d_padding.gif)
 
 + <strides>:  The strides parameter is a 2-tuple of integers, specifying the “step” of the convolution along the *x* and *y* axis of the input volume. typically you’ll leave the strides parameter with the default (1, 1) value; however, you may occasionally increase it to (2, 2) to help reduce the size of the output volume 
 
@@ -343,4 +378,128 @@ def pred_wrong_display_MNIST_dataset(X_test, predictions, Y_test):
 # Displays misclassified digits from MNIST
 Y_test_pred = pred_wrong_display_MNIST_dataset(X_test, predictions, Y_test)
 ```
+
+---
+
+<footer>
+
+## Transfer learning & pre-trained models:
+
+###  fine tuning:
+
+There is a three-point system to working with fine-tuning: 
+
+1. Add a classifier (ANN) on top of a pre-trained system. 
+2. Freeze the convolutional base and train the network.
+3. Train the added classifier and the unfrozen part of the convolutional  base jointly.
+
+### ImageNet data set 
+
++ VGG16  `16 layers`
++ Inception V3  
++ Xception 
++ ResNet50 `50 layers`
++ MobileNet 
+
+```python
+import numpy as np
+from keras.applications.vgg16 import VGG16
+from keras.preprocessing import image
+from keras.applications.vgg16 import preprocess_input
+# load model
+classifier = VGG16()
+# load new pics
+new_image= image.load_img('../Data/Prediction/pizza.jpg.jpg', target_size=(224, 224))
+
+# transform new pics
+transformed_image = image.img_to_array(new_image)
+transformed_image = np.expand_dims(transformed_image, axis=0)
+    	# transformed_image.shape ->(1,244,244,3)
+transformed_image = preprocess_input(transformed_image)
+    	# transformed_image.shape must be (1, 244,244,3)
+
+# predict new pics
+y_pred = classifier.predict(transformed_image)
+from keras.applications.vgg16 import decode_predictions
+decode_predictions(y_pred,top=5)
+
+# print probobility 
+label = decode_predictions(y_pred)
+# Most likely result is retrieved, for example, the highest  probability
+decoded_label = label[0][0]
+# The classification is printed 
+print('%s (%.2f%%)' % (decoded_label[1], decoded_label[2]*100 ))
+```
+
+### fine tune vgg-16 (create a similar model actually)
+
+#### Remove the last layer, labeled predictions in the preceding image, from the  model summary. 
+
+Create a new Keras model of the sequential class and iterate  through all the layers of the VGG model. Add all of them to the new model, except  for the last layer
+
+```python
+vgg_model = keras.applications.vgg16.VGG16()
+vgg_model.summary() 
+
+last_layer = str(vgg_model.layers[-1])
+np.random.seed(42)
+random.set_seed(42)
+classifier= keras.Sequential()
+for layer in vgg_model.layers:
+    if str(layer) != last_layer:
+        classifier.add(layer)
+```
+
+#### freeze initial layers & add new classification layer
+
+```python
+for layer in classifier.layers:
+    layer.trainable=False
+    
+classifier.add(Dense(1, activation='sigmoid'))
+classifier.summary()
+
+classifier.compile(optimizer='adam', loss='binary_crossentropy', 
+metrics=['accuracy'])
+```
+
+````python
+from keras.preprocessing.image import ImageDataGenerator
+generate_train_data = ImageDataGenerator(rescale = 1./255,
+                                         shear_range = 0.2, 
+                                         zoom_range = 0.2,
+                                         horizontal_flip = True)
+generate_test_data = ImageDataGenerator(rescale =1./255)
+training_dataset = generate_train_data.flow_from_directory(
+    '../Data/dataset/training_set',target_size = (224, 224),
+    batch_size = 32,
+    class_mode = 'binary')
+test_datasetset = generate_test_data.flow_from_directory(
+    '../Data/dataset/test_set',
+    target_size = (224, 224),
+    batch_size = 32,
+    class_mode = 'binary')
+classifier.fit_generator(training_dataset,
+                         steps_per_epoch = 100,
+                         epochs = 10,
+                         validation_data = test_datasetset,
+                         validation_steps = 30,
+                         shuffle=False)
+````
+
+````python
+from keras.preprocessing import image
+new_image = image.load_img('../Data/Prediction/test_image_2.jpg', 
+                           target_size = (224, 224))
+new_image = image.img_to_array(new_image)
+new_image = np.expand_dims(new_image, axis = 0)
+result = classifier.predict(new_image)
+training_set.class_indices
+if result[0][0] == 1:
+    prediction = 'It is a flower'
+else:
+    prediction = 'It is a car'
+print(prediction)
+
+````
 
