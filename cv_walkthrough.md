@@ -9,6 +9,8 @@ reference:
 
 
 
+
+
 # CV walk through
 
 Computer Vision: Chinese word classification.
@@ -173,7 +175,7 @@ Conv2D (filters, kernel_size, strides=(1, 1),\
         kernel_constraint=None, bias_constraint=None)
 ```
 
-+ <filters>: number of  filters that the convolutional layer will learn.
++ <filters>: number of  filters that the convolutional layer will learn. feature detectors.
 
   ```yaml
   So, how should you choose your filter_size ? 
