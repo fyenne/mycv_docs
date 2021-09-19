@@ -183,7 +183,7 @@ Conv2D (filters, kernel_size, strides=(1, 1),\
 
 + <kernel size>: **must be an \*odd\* integer as well.** Typical values for  kernel_size  include: (1, 1) , (3, 3) , (5, 5) , (7, 7) . It’s rare to see kernel sizes larger than *7×7*.
 
-+ ![keras_conv2d_padding](C:\Users\dscshap3808\Documents\my_scripts_new\mycv_plays\doc_pics\keras_conv2d_padding.gif)
++ ![keras_conv2d_padding](.\doc_pics\keras_conv2d_padding.gif)
 
 + <strides>:  The strides parameter is a 2-tuple of integers, specifying the “step” of the convolution along the *x* and *y* axis of the input volume. typically you’ll leave the strides parameter with the default (1, 1) value; however, you may occasionally increase it to (2, 2) to help reduce the size of the output volume 
 
