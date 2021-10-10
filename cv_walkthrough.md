@@ -384,7 +384,6 @@ Y_test_pred = pred_wrong_display_MNIST_dataset(X_test, predictions, Y_test)
 ---
 
 <footer>
-
 ## Transfer learning & pre-trained models:
 
 ###  fine tuning:
@@ -411,7 +410,7 @@ from keras.applications.vgg16 import preprocess_input
 # load model
 classifier = VGG16()
 # load new pics
-new_image= image.load_img('../Data/Prediction/pizza.jpg.jpg', target_size=(224, 224))
+new_image = image.load_img('../Data/Prediction/pizza.jpg.jpg', target_size=(224, 224))
 
 # transform new pics
 transformed_image = image.img_to_array(new_image)
