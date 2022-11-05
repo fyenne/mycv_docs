@@ -7,3 +7,5 @@
 *.json
 *.mat
 *.tfrecords
+chines/data/.DS_Store
+chines/.DS_Store
